@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Cambia esto por una contraseña segura
+      MYSQL_DATABASE: test_db          # Nombre de tu base de datos
+      MYSQL_USER: user                 # Usuario de la base de datos
+      MYSQL_PASSWORD: password         # Contraseña del usuario
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    container_name: backend_app
+    restart: unless-stopped
+    ports:
+      - "3333:3333" # Puerto de AdonisJS
+    volumes:
+      # Para desarrollo, puedes mapear tu código local de 'api/' al contenedor:
+      - ./packages/backend/api:/usr/src/app
+      # Esta línea evita que los node_modules locales sobreescriban los del contenedor:
+      - /usr/src/app/node_modules
+      # NOTA: Para un entorno de "producción" o para probar la imagen tal cual se construyó,
+      # deberías comentar o eliminar las dos líneas de 'volumes' anteriores.
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: mysql
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DB_NAME: test_db
+      HOST: 0.0.0.0
+      PORT: 3333
+      NODE_ENV: production # Cambiado a production
+      APP_KEY: 'wTLFAHt2t_dIpIq5RhoAVbsECjvy8IQb' # ¡IMPORTANTE! Genera y usa una clave real.
+      LOG_LEVEL: 'info'
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    platform: linux/amd64 
+    container_name: frontend_app
+    restart: unless-stopped
+    ports:
+      - "3000:80" # Puerto de React (servido por Nginx en el puerto 80 del contenedor)
+    volumes:
+      - ./packages/frontend/src:/usr/src/app/src # Sincroniza solo el código fuente para desarrollo
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

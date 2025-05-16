@@ -1,0 +1,21 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/frontend",
+    "packages/backend/api"
+  ],
+  "dependencies": {
+    "web-vitals": "^5.0.1",
+    "zustand": "^5.0.4"
+  },
+  "devDependencies": {
+    "lerna": "^8.2.2"
+  },
+  "scripts": {
+    "start:frontend": "npm run start --workspace=frontend",
+    "start:backend": "npm run dev --workspace=api",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down"
+  }
+}

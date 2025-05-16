@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    // ... otras opciones ...
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@japa/preset-adonis/build/adonis-typings" // Asegúrate de que esta ruta sea correcta si los typings están aquí
+    ],
+    "types": [
+      "@japa/preset-adonis" // O el nombre del paquete de typings si es diferente
+      // ... otros tipos ...
+    ]
+  },
+  // ... otras configuraciones ...
+}
