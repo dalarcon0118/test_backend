@@ -24,7 +24,7 @@ services:
     container_name: backend_app
     restart: unless-stopped
     ports:
-      - "3333:3333" # Puerto de AdonisJS
+      - "3334:3333" # Puerto de AdonisJS
     volumes:
       # Para desarrollo, puedes mapear tu código local de 'api/' al contenedor:
       - ./packages/backend/api:/usr/src/app
@@ -43,11 +43,17 @@ services:
       MYSQL_DB_NAME: test_db
       HOST: 0.0.0.0
       PORT: 3333
-      NODE_ENV: production # Cambiado a production
+      NODE_ENV: development # Cambiado a production
       APP_KEY: 'wTLFAHt2t_dIpIq5RhoAVbsECjvy8IQb' # ¡IMPORTANTE! Genera y usa una clave real.
       LOG_LEVEL: 'info'
     networks:
       - app-network
+    command: >
+      sh -c "
+        node ace migration:fresh --force &&
+        node ace migration:run --force &&
+        node ace serve --watch
+      "
 
   frontend:
     build:
@@ -60,6 +66,7 @@ services:
       - "3000:80" # Puerto de React (servido por Nginx en el puerto 80 del contenedor)
     volumes:
       - ./packages/frontend/src:/usr/src/app/src # Sincroniza solo el código fuente para desarrollo
+      - /usr/src/app/node_modules # Asegúrate de que los node_modules no se sobrescriban
     depends_on:
       - backend
     networks:

@@ -1,0 +1,9 @@
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.card-grid .ant-card {
+  margin-bottom: 16px;
+}

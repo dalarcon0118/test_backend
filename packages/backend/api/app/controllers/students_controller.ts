@@ -1,35 +1,69 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Student from '#models/student' // Asegúrate que la ruta al modelo Student es correcta
-import { createStudentValidator } from '#validators/create_student_validator' // Ruta al validador creado
+import Student from '#models/student'
+// Asume que el validador está en la siguiente ruta
+import { createStudentValidator } from '#validators/create_student_validator'
+import luxon, { DateTime } from 'luxon'
 
 export default class StudentsController {
-  /**
-   * Handle new student registration
-   */
-  public async store({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(createStudentValidator)
-
+  async index({ response }: HttpContext) {
     try {
-      // Asumiendo que tu modelo Student tiene los campos name, email, birth_date
-      // y que birth_date en el modelo es de tipo DateTime de Luxon o compatible.
-      const studentData: { name: string; email: string; birth_date?: any } = {
-        name: payload.name,
-        email: payload.email,
-      }
-
-      if (payload.birth_date) {
-        studentData.birth_date = payload.birth_date // VineJS ya lo convierte a objeto Date de JS
-      }
-
-      const student = await Student.create(studentData)
-      return response.created(student)
+      const students = await Student.all()
+      return response.status(200).json(students)
     } catch (error) {
-      console.error('Error creating student:', error)
-      return response
-        .status(500)
-        .json({ message: 'An error occurred while creating the student.', error: error.message })
+      return response.status(500).json({ error: 'Error al obtener los estudiantes' })
     }
   }
 
-  // Aquí puedes añadir otros métodos como index, show, update, destroy
+  async show({ params, response }: HttpContext) {
+    try {
+      const student = await Student.findOrFail(params.id)
+      return response.status(200).json(student)
+    } catch (error) {
+      return response.status(404).json({ error: 'Estudiante no encontrado' })
+    }
+  }
+
+  async store({ request, response }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(createStudentValidator)
+      // Convertir birth_date a DateTime si existe y es string
+      const npayload = {
+        ...payload,
+        birth_date:
+          payload.birth_date && payload.birth_date instanceof Date
+            ? DateTime.fromJSDate(payload.birth_date)
+            : payload.birth_date,
+      }
+      const student = await Student.create(npayload)
+      return response.status(201).json(student)
+    } catch (error) {
+      if (error.code === 'E_VALIDATION_ERROR') {
+        return response.status(422).json({ errors: error.messages })
+      }
+      return response
+        .status(500)
+        .json({ error: 'Error al crear el estudiante', details: error.message })
+    }
+  }
+
+  async update({ params, request, response }: HttpContext) {
+    try {
+      const student = await Student.findOrFail(params.id)
+      const data = request.only(['name', 'email'])
+      await student.merge(data as any).save()
+      return response.status(200).json(student)
+    } catch (error) {
+      return response.status(404).json({ error: 'Estudiante no encontrado' })
+    }
+  }
+
+  async destroy({ params, response }: HttpContext) {
+    try {
+      const student = await Student.findOrFail(params.id)
+      await student.delete()
+      return response.status(204)
+    } catch (error) {
+      return response.status(404).json({ error: 'Estudiante no encontrado' })
+    }
+  }
 }

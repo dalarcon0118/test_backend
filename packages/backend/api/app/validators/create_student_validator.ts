@@ -12,6 +12,6 @@ export const createStudentValidator = vine.compile(
         const student = await db.from('students').where('email', value).first()
         return !student
       }),
-    birth_date: vine.date({ formats: ['YYYY-MM-DD'] }).optional(), // Formato YYYY-MM-DD. Cambia .optional() si es requerido.
+    birth_date: vine.date({ formats: ['YYYY-MM-DD'] }), // Formato YYYY-MM-DD. Cambia .optional() si es requerido.
   })
 )

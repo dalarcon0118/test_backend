@@ -12,7 +12,7 @@ export default class Student extends BaseModel {
   declare email: string
 
   @column.date() // Especifica que es una columna de tipo fecha
-  declare birth_data: DateTime | null // DateTime de Luxon para fechas
+  declare birth_date: DateTime | null // DateTime de Luxon para fechas
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
