@@ -19,11 +19,6 @@ COPY api/ ./
 # Added --ignore-ts-errors flag
 RUN node ace build --ignore-ts-errors
 
-# Etapa de producción
-# Cambiado de node:18-alpine a node:18
-FROM node:18
-
-WORKDIR /usr/src/app
 
 # Copiar artefactos esenciales desde la etapa de construcción
 COPY --from=build /usr/src/app/node_modules ./node_modules

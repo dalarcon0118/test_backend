@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CoursesView from './CoursesView';
+import CoursesView from '../views/CoursesView';
 
 describe('CoursesView', () => {
   it('debe mostrar el título de gestión de cursos', () => {
